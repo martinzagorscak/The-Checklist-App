@@ -26,48 +26,48 @@ fun ApiChecklistItem.toDomain(): ChecklistItem =
         is ApiChoiceItem -> toDomain()
     }
 
-fun ApiPage.toDomain(): ChecklistPage =
+private fun ApiPage.toDomain(): ChecklistPage =
     ChecklistPage(
         id = id,
         title = title,
         items = items.map { it.toDomain() },
     )
 
-fun ApiSection.toDomain(): ChecklistSection =
+private fun ApiSection.toDomain(): ChecklistSection =
     ChecklistSection(
         id = id,
         title = title,
         items = items.map { it.toDomain() },
     )
 
-fun ApiTextItem.toDomain(): ChecklistTextItem =
+private fun ApiTextItem.toDomain(): ChecklistTextItem =
     ChecklistTextItem(
         id = id,
         content = content,
     )
 
-fun ApiImageItem.toDomain(): ChecklistImageItem =
+private fun ApiImageItem.toDomain(): ChecklistImageItem =
     ChecklistImageItem(
         id = id,
         title = title,
         src = src,
     )
 
-fun ApiChoiceItem.toDomain(): ChecklistChoiceItem =
+private fun ApiChoiceItem.toDomain(): ChecklistChoiceItem =
     ChecklistChoiceItem(
         id = id,
         content = content,
         responseSet = responseSet.toDomain(),
     )
 
-fun ApiResponseSet.toDomain(): ChecklistResponseSet =
+private fun ApiResponseSet.toDomain(): ChecklistResponseSet =
     ChecklistResponseSet(
         id = id,
         multipleSelection = multipleSelection,
         responses = responses.map { it.toDomain() },
     )
 
-fun ApiResponse.toDomain(): ChecklistResponse =
+private fun ApiResponse.toDomain(): ChecklistResponse =
     ChecklistResponse(
         id = id,
         label = label,
