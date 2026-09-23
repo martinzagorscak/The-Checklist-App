@@ -1,4 +1,4 @@
-package com.example.thechecklistapp.data.api.client
+package com.example.thechecklistapp.data.client
 
 import android.util.Log
 import io.ktor.client.HttpClient
@@ -10,6 +10,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.scope.Scope
@@ -50,7 +51,7 @@ private fun <T : HttpClientEngineConfig> HttpClientConfig<T>.installContentNegot
         json(json)
 
         // reading data from Gist as text/plain, but it is actually JSON
-        json(json, io.ktor.http.ContentType.Text.Plain)
+        json(json, ContentType.Text.Plain)
     }
 
 private fun <T : HttpClientEngineConfig> HttpClientConfig<T>.installLogging() {

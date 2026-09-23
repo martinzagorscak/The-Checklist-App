@@ -1,4 +1,4 @@
-package com.example.thechecklistapp.data.api.model
+package com.example.thechecklistapp.data.model
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
