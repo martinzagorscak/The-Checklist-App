@@ -10,11 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.thechecklistapp.ui.viewmodel.ChecklistViewState
 
 @Composable
 fun MainChecklistScreen(
+    checklistViewState: ChecklistViewState,
     callbacks: MainChecklistScreenCallbacks,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -38,14 +40,17 @@ fun MainChecklistScreen(
 @Composable
 private fun MainChecklistScreenPreview() {
     MainChecklistScreen(
+        checklistViewState = ChecklistViewState.Loading,
         callbacks = MainChecklistScreenCallbacks(
             onImageClick = {},
-            onSelectableOptionClick = { _, _ -> }
-        )
+            onSelectableOptionClick = { _, _, _ -> },
+            onRetryClick = {},
+        ),
     )
 }
 
 data class MainChecklistScreenCallbacks(
     val onImageClick: (id: Int) -> Unit,
-    val onSelectableOptionClick: (responseSetId: Int, responseId: Int) -> Unit,
+    val onSelectableOptionClick: (responseSetId: Int, responseId: Int, isMultipleChoice: Boolean) -> Unit,
+    val onRetryClick: () -> Unit,
 )
