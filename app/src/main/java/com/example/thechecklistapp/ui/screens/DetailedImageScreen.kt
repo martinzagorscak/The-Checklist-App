@@ -1,5 +1,6 @@
 package com.example.thechecklistapp.ui.screens
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -20,17 +22,24 @@ import coil.compose.AsyncImage
 import com.example.thechecklistapp.R
 import com.example.thechecklistapp.ui.components.AlignInTheMiddle
 import com.example.thechecklistapp.ui.components.IconButton
+import com.example.thechecklistapp.ui.components.SharedElementTransitionScope
 import com.example.thechecklistapp.ui.components.TopBar
+import com.example.thechecklistapp.ui.components.applySharedTransition
+import com.example.thechecklistapp.ui.components.checklistImageSharedElementKey
+import com.example.thechecklistapp.ui.components.checklistImageTitleSharedElementKey
 import com.example.thechecklistapp.ui.theme.Typography
 import com.example.thechecklistapp.ui.theme.padding400
 import com.example.thechecklistapp.ui.theme.padding800
 import com.example.thechecklistapp.ui.viewmodel.DetailedImageViewState
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun DetailedImageScreen(
+    imageId: Int,
     imageViewState: DetailedImageViewState,
     callbacks: DetailedScreenCallbacks,
     modifier: Modifier = Modifier,
+    sharedElementTransitionScope: SharedElementTransitionScope? = null,
 ) {
     Scaffold(
         topBar = {
@@ -88,6 +97,7 @@ fun DetailedImageScreen(
             }
 
             is DetailedImageViewState.Loaded -> Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(padding400),
                 modifier = Modifier
                     .fillMaxSize()
@@ -99,13 +109,23 @@ fun DetailedImageScreen(
                     text = imageViewState.title,
                     style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.applySharedTransition(
+                        scope = sharedElementTransitionScope,
+                        key = checklistImageTitleSharedElementKey(imageId),
+                        shareOnlyBounds = true,
+                    )
                 )
                 AsyncImage(
                     model = imageViewState.src,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .applySharedTransition(
+                            scope = sharedElementTransitionScope,
+                            key = checklistImageSharedElementKey(imageId),
+                            shareOnlyBounds = false,
+                        )
+                        .fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
@@ -117,6 +137,7 @@ fun DetailedImageScreen(
 @Composable
 private fun DetailedImageScreenPreview() {
     DetailedImageScreen(
+        imageId = 1,
         imageViewState = DetailedImageViewState.Loading,
         callbacks = DetailedScreenCallbacks(
             onBackClick = {},

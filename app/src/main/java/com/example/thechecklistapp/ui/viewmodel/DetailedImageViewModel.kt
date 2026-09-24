@@ -2,18 +2,13 @@ package com.example.thechecklistapp.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.thechecklistapp.device.ConnectivityStatus
-import com.example.thechecklistapp.device.ConnectivityStatusPublisher
 import com.example.thechecklistapp.domain.model.ChecklistImageItem
 import com.example.thechecklistapp.domain.model.ChecklistItem
 import com.example.thechecklistapp.domain.model.ChecklistPage
 import com.example.thechecklistapp.domain.model.ChecklistSection
 import com.example.thechecklistapp.domain.usecase.GetChecklistUseCase
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -34,35 +29,46 @@ abstract class DetailedImageViewModel : ViewModel() {
 internal class DetailedImageViewModelImpl(
     imageSectionId: Int,
     getChecklistUseCase: GetChecklistUseCase,
-    connectivityStatusPublisher: ConnectivityStatusPublisher,
 ) : DetailedImageViewModel() {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val imageViewState: StateFlow<DetailedImageViewState> =
-        connectivityStatusPublisher.status()
-            .filter { it == ConnectivityStatus.CONNECTED }
-            .flatMapLatest {
-                getChecklistUseCase()
-                    .map { checklist ->
-                        when {
-                            checklist == null -> DetailedImageViewState.Error
-                            checklist.isEmpty() -> DetailedImageViewState.Loading
-                            else -> checklist.findImage(imageSectionId)?.let { image ->
-                                DetailedImageViewState.Loaded(
-                                    title = image.title,
-                                    src = image.src,
-                                )
-                            } ?: DetailedImageViewState.NotFound
-                        }
-                    }
+        getChecklistUseCase()
+            .map { checklist ->
+                when {
+                    checklist == null -> DetailedImageViewState.Error
+                    checklist.isEmpty() -> DetailedImageViewState.Loading
+                    else -> checklist.findImage(imageSectionId)?.let { image ->
+                        DetailedImageViewState.Loaded(
+                            title = image.title,
+                            src = image.src,
+                        )
+                    } ?: DetailedImageViewState.NotFound
+                }
             }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = DetailedImageViewState.Loading,
+                initialValue = computeInitialViewState(imageSectionId, getChecklistUseCase),
             )
 
     override fun imageViewState(): StateFlow<DetailedImageViewState> = imageViewState
+}
+
+private fun computeInitialViewState(
+    imageId: Int,
+    getChecklistUseCase: GetChecklistUseCase,
+): DetailedImageViewState {
+    val checklist = (getChecklistUseCase() as? StateFlow<List<ChecklistItem>?>)?.value
+    return when {
+        checklist == null -> DetailedImageViewState.Loading
+        checklist.isEmpty() -> DetailedImageViewState.Loading
+        else -> checklist.findImage(imageId)?.let { image ->
+            DetailedImageViewState.Loaded(
+                title = image.title,
+                src = image.src,
+            )
+        } ?: DetailedImageViewState.NotFound
+    }
 }
 
 private fun List<ChecklistItem>.findImage(imageId: Int): ChecklistImageItem? {

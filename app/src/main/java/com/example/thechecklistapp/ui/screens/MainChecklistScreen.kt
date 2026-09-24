@@ -15,6 +15,7 @@ import com.example.thechecklistapp.ui.components.CTA
 import com.example.thechecklistapp.ui.components.Checklist
 import com.example.thechecklistapp.ui.components.ChecklistCallbacks
 import com.example.thechecklistapp.ui.components.FallbackState
+import com.example.thechecklistapp.ui.components.SharedElementTransitionScope
 import com.example.thechecklistapp.ui.components.TopBar
 import com.example.thechecklistapp.ui.viewmodel.ChecklistViewState
 
@@ -23,6 +24,7 @@ fun MainChecklistScreen(
     checklistViewState: ChecklistViewState,
     callbacks: MainChecklistScreenCallbacks,
     modifier: Modifier = Modifier,
+    sharedElementTransitionScope: SharedElementTransitionScope? = null,
 ) {
     Scaffold(
         topBar = {
@@ -43,6 +45,7 @@ fun MainChecklistScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
+                    sharedElementTransitionScope = sharedElementTransitionScope,
                 )
             }
 

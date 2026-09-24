@@ -19,7 +19,6 @@ val viewModelModule = module {
         DetailedImageViewModelImpl(
             imageSectionId = imageSectionId,
             getChecklistUseCase = get(),
-            connectivityStatusPublisher = get(),
         )
     }
 }

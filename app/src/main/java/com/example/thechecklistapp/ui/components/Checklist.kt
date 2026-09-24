@@ -1,5 +1,6 @@
 package com.example.thechecklistapp.ui.components
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -51,6 +52,7 @@ private val maxResponseSetHeight = 200.dp
 private val borderWidth = 1.dp
 private val labelScoreSize = 20.dp
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun Checklist(
     checklistItems: List<PresentableChecklistItem>,
@@ -58,6 +60,7 @@ fun Checklist(
     modifier: Modifier = Modifier,
     isScrollable: Boolean = true,
     sectionDepth: Int = 0,
+    sharedElementTransitionScope: SharedElementTransitionScope? = null,
 ) {
     if (isScrollable) { // Because of recursive callbacks when composing the checklist, LazyColumn is only for root level pages
         LazyColumn(modifier = modifier) {
@@ -66,6 +69,7 @@ fun Checklist(
                     checklistItem = checklistItem,
                     checklistCallbacks = checklistCallbacks,
                     sectionDepth = sectionDepth,
+                    sharedElementTransitionScope = sharedElementTransitionScope,
                 )
             }
         }
@@ -76,6 +80,7 @@ fun Checklist(
                     checklistItem = checklistItem,
                     checklistCallbacks = checklistCallbacks,
                     sectionDepth = sectionDepth,
+                    sharedElementTransitionScope = sharedElementTransitionScope,
                     modifier = Modifier.padding(vertical = padding100),
                 )
             }
@@ -83,12 +88,14 @@ fun Checklist(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ChecklistItem(
     checklistItem: PresentableChecklistItem,
     checklistCallbacks: ChecklistCallbacks,
     sectionDepth: Int,
     modifier: Modifier = Modifier,
+    sharedElementTransitionScope: SharedElementTransitionScope? = null,
 ) {
     when (checklistItem) {
         is PresentableChecklistPage -> {
@@ -96,6 +103,7 @@ private fun ChecklistItem(
                 page = checklistItem,
                 checklistCallbacks = checklistCallbacks,
                 sectionDepth = sectionDepth,
+                sharedElementTransitionScope = sharedElementTransitionScope,
                 modifier = modifier,
             )
         }
@@ -105,6 +113,7 @@ private fun ChecklistItem(
                 section = checklistItem,
                 checklistCallbacks = checklistCallbacks,
                 sectionDepth = sectionDepth,
+                sharedElementTransitionScope = sharedElementTransitionScope,
                 modifier = modifier,
             )
         }
@@ -120,6 +129,7 @@ private fun ChecklistItem(
             ImageItem(
                 imageItem = checklistItem,
                 onClick = { checklistCallbacks.onImageClick(checklistItem.id) },
+                sharedElementTransitionScope = sharedElementTransitionScope,
                 modifier = modifier,
             )
         }
@@ -133,12 +143,14 @@ private fun ChecklistItem(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun Page(
     page: PresentableChecklistPage,
     checklistCallbacks: ChecklistCallbacks,
     sectionDepth: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sharedElementTransitionScope: SharedElementTransitionScope? = null,
 ) {
     Column(
         modifier = modifier
@@ -163,17 +175,20 @@ private fun Page(
             modifier = Modifier.padding(start = padding200),
             isScrollable = false,
             sectionDepth = sectionDepth,
+            sharedElementTransitionScope = sharedElementTransitionScope,
         )
 
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun Section(
     section: PresentableChecklistSection,
     checklistCallbacks: ChecklistCallbacks,
     sectionDepth: Int,
     modifier: Modifier = Modifier,
+    sharedElementTransitionScope: SharedElementTransitionScope? = null,
 ) {
     Column(modifier = modifier) {
         Text(
@@ -186,6 +201,7 @@ private fun Section(
             modifier = Modifier.padding(start = padding200),
             isScrollable = false,
             sectionDepth = sectionDepth + 1,
+            sharedElementTransitionScope = sharedElementTransitionScope,
         )
     }
 }
@@ -203,11 +219,13 @@ private fun TextItem(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ImageItem(
     imageItem: PresentableChecklistImageItem,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sharedElementTransitionScope: SharedElementTransitionScope? = null,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -227,12 +245,24 @@ private fun ImageItem(
             contentScale = ContentScale.Fit,
             placeholder = painterResource(R.drawable.ic_photo_placeholder),
             fallback = painterResource(R.drawable.ic_photo_placeholder),
-            modifier = Modifier.sizeIn(minWidth = minChecklistImageWidth, maxWidth = maxChecklistImageWidth),
+            modifier = Modifier
+                .applySharedTransition(
+                    scope = sharedElementTransitionScope,
+                    key = checklistImageSharedElementKey(imageItem.id),
+                    shareOnlyBounds = false,
+                )
+                .sizeIn(minWidth = minChecklistImageWidth, maxWidth = maxChecklistImageWidth),
         )
         Text(
             text = imageItem.title,
             style = Typography.bodySmall,
-            modifier = Modifier.wrapContentWidth(),
+            modifier = Modifier
+                .applySharedTransition(
+                    scope = sharedElementTransitionScope,
+                    key = checklistImageTitleSharedElementKey(imageItem.id),
+                    shareOnlyBounds = true,
+                )
+                .wrapContentWidth(),
         )
     }
 }
