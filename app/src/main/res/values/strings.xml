@@ -6,4 +6,6 @@
     <string name="detailed_image_screen_not_found_message">Image not found.</string>
     <string name="checklist_screen_error_message">Unable to load the checklist.</string>
     <string name="try_again">Try Again</string>
+    <string name="unstable_network_connection_message">Unstable network connection.</string>
+    <string name="unstable_network_cta_label">Check connection</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.example.thechecklistapp.ui.navigation
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -9,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,6 +42,7 @@ fun SetupNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     NavHost(
         navController = navController,
         startDestination = Screen.MainChecklistScreen,
@@ -67,6 +71,9 @@ fun SetupNavGraph(
                             )
                         },
                         onRetryClick = viewModel::refetchChecklist,
+                        onCheckConnectivityClick = {
+                            context.startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
+                        },
                     )
                 }
             )

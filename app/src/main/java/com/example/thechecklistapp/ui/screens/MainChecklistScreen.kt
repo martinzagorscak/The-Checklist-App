@@ -4,7 +4,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,9 +28,22 @@ fun MainChecklistScreen(
     callbacks: MainChecklistScreenCallbacks,
     modifier: Modifier = Modifier,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        snackbarHostState.showSnackbar(
+            message = "Snackbar text",
+            duration = SnackbarDuration.Short,
+            withDismissAction = true,
+        )
+    }
+
     Scaffold(
         topBar = {
             TopBar(title = stringResource(R.string.checklist_screen_title))
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
         modifier = modifier.fillMaxSize(),
     ) { paddingValues ->
@@ -46,7 +63,23 @@ fun MainChecklistScreen(
                 )
             }
 
-            ChecklistViewState.Error -> {
+            ChecklistViewState.Error.ConnectivityError -> {
+                AlignInTheMiddle(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    FallbackState(
+                        title = stringResource(R.string.unstable_network_connection_message),
+                        cta = CTA(
+                            label = stringResource(R.string.unstable_network_cta_label),
+                            onClick = callbacks.onCheckConnectivityClick,
+                        )
+                    )
+                }
+            }
+
+            ChecklistViewState.Error.DataRetrievingError -> {
                 AlignInTheMiddle(
                     modifier = Modifier
                         .fillMaxSize()
@@ -84,6 +117,7 @@ private fun MainChecklistScreenPreview() {
             onImageClick = {},
             onSelectableOptionClick = { _, _, _ -> },
             onRetryClick = {},
+            onCheckConnectivityClick = {},
         ),
     )
 }
@@ -92,4 +126,5 @@ data class MainChecklistScreenCallbacks(
     val onImageClick: (id: Int) -> Unit,
     val onSelectableOptionClick: (responseSetId: Int, responseId: Int, isMultipleChoice: Boolean) -> Unit,
     val onRetryClick: () -> Unit,
+    val onCheckConnectivityClick: () -> Unit,
 )

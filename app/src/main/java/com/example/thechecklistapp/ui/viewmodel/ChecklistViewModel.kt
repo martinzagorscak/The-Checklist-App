@@ -3,6 +3,8 @@ package com.example.thechecklistapp.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.thechecklistapp.device.ConnectivityStatus
+import com.example.thechecklistapp.device.ConnectivityStatusPublisher
 import com.example.thechecklistapp.domain.usecase.GetChecklistUseCase
 import com.example.thechecklistapp.domain.usecase.RefetchChecklistUseCase
 import com.example.thechecklistapp.ui.model.PresentableChecklistItem
@@ -20,7 +22,11 @@ import kotlinx.coroutines.launch
 
 sealed class ChecklistViewState {
     object Loading : ChecklistViewState()
-    object Error : ChecklistViewState()
+    sealed class Error : ChecklistViewState() {
+        object ConnectivityError : Error()
+        object DataRetrievingError : Error()
+    }
+
     data class Loaded(val checklistItems: List<PresentableChecklistItem>) : ChecklistViewState()
 }
 
@@ -33,6 +39,7 @@ abstract class ChecklistViewModel : ViewModel() {
 internal class ChecklistViewModelImpl(
     getChecklistUseCase: GetChecklistUseCase,
     private val refetchChecklistUseCase: RefetchChecklistUseCase,
+    private val connectivityStatusPublisher: ConnectivityStatusPublisher,
 ) : ChecklistViewModel() {
 
     // This map holds the checked items for each response set. <responseSetId, Set<responseIds>>
@@ -41,15 +48,17 @@ internal class ChecklistViewModelImpl(
     private val checklistViewState: StateFlow<ChecklistViewState> = combine(
         getChecklistUseCase(),
         checkedItems,
-    ) { checklistItems, selectedItems ->
+        connectivityStatusPublisher.status(),
+    ) { checklistItems, selectedItems, connectivityStatus ->
         when {
-            checklistItems == null -> ChecklistViewState.Error
+            connectivityStatus != ConnectivityStatus.CONNECTED -> ChecklistViewState.Error.ConnectivityError
+            checklistItems == null -> ChecklistViewState.Error.DataRetrievingError
             checklistItems.isEmpty() -> ChecklistViewState.Loading
             else -> ChecklistViewState.Loaded(checklistItems.toPresentableModel(selectedItems))
         }
     }.catch {
         Log.e("ChecklistViewModelImpl", it.message ?: "Error occurred in the view state")
-        emit(ChecklistViewState.Error)
+        emit(ChecklistViewState.Error.DataRetrievingError)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),

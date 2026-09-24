@@ -12,12 +12,14 @@ val viewModelModule = module {
         ChecklistViewModelImpl(
             getChecklistUseCase = get(),
             refetchChecklistUseCase = get(),
+            connectivityStatusPublisher = get()
         )
     }
     viewModel<DetailedImageViewModel> { (imageSectionId: Int) ->
         DetailedImageViewModelImpl(
             imageSectionId = imageSectionId,
             getChecklistUseCase = get(),
+            connectivityStatusPublisher = get(),
         )
     }
 }
