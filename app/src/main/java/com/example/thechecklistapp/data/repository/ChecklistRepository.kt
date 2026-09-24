@@ -1,15 +1,16 @@
 package com.example.thechecklistapp.data.repository
 
+import android.util.Log
 import com.example.thechecklistapp.data.api.ChecklistApi
 import com.example.thechecklistapp.data.model.ApiChecklistItem
+import com.example.thechecklistapp.data.persistance.ChecklistLocalDataSource
 import com.example.thechecklistapp.domain.model.ChecklistItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerializationException
 
 interface ChecklistRepository {
     /**
@@ -28,6 +29,7 @@ interface ChecklistRepository {
 
 internal class ChecklistRepositoryImpl(
     private val checklistApi: ChecklistApi,
+    private val checklistLocalDataSource: ChecklistLocalDataSource,
     scope: CoroutineScope,
 ) : ChecklistRepository {
 
@@ -36,13 +38,21 @@ internal class ChecklistRepositoryImpl(
 
     init {
         scope.launch {
-            refetchChecklistPublisher
-                .onStart { emit(Unit) }
-                .collect {
-                    // TODO logic to fetch from cache first, then from API if cache is empty
-                    // also store the checklist items in cache after fetching from API
-                    checklistPublisher.update { fetchChecklistFromApi() }
+            val cachedChecklist = loadCachedChecklist()
+            if (cachedChecklist.isNotEmpty()) {
+                checklistPublisher.value = cachedChecklist
+            } else {
+                checklistPublisher.value = fetchChecklistFromApi()
+            }
+
+            refetchChecklistPublisher.collect {
+                val refreshedChecklist = fetchChecklistFromApi()
+                if (refreshedChecklist != null) {
+                    checklistPublisher.value = refreshedChecklist
+                } else if (checklistPublisher.value.isNullOrEmpty()) {
+                    checklistPublisher.value = loadCachedChecklist().ifEmpty { null }
                 }
+            }
         }
     }
 
@@ -51,8 +61,17 @@ internal class ChecklistRepositoryImpl(
     override suspend fun refetchChecklist() = refetchChecklistPublisher.emit(Unit)
 
     private suspend fun fetchChecklistFromApi(): List<ChecklistItem>? {
-        val checklistItemsResponse = checklistApi.getChecklistItems()
-        val checklistItems = checklistItemsResponse.getOrNull()?.map(ApiChecklistItem::toDomain)
-        return checklistItems
+        val apiChecklistItems = checklistApi.getChecklistItems().getOrNull() ?: return null
+        checklistLocalDataSource.replaceChecklist(apiChecklistItems)
+        return apiChecklistItems.map(ApiChecklistItem::toDomain)
     }
+
+    private suspend fun loadCachedChecklist(): List<ChecklistItem> =
+        try {
+            checklistLocalDataSource.getChecklist()
+        } catch (exception: SerializationException) {
+            Log.e("ChecklistRepositoryImpl", "Cached checklist payload is invalid", exception)
+            checklistLocalDataSource.clearChecklist()
+            emptyList()
+        }
 }
