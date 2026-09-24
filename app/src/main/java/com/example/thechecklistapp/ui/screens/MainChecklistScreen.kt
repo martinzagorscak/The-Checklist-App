@@ -21,12 +21,12 @@ fun MainChecklistScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
     ) { paddingValues ->
-        // TODO: Implement the main checklist screen UI here
+        // TODO Render the checklist items based on the checklistViewState
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .clickable(onClick = { callbacks.onImageClick(-1) })
+                .clickable(onClick = { callbacks.onImageClick(4) })
         ) {
             Text(
                 text = "Main Checklist Screen",

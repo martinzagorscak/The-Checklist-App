@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -37,29 +38,25 @@ internal class ChecklistViewModelImpl(
     // This map holds the checked items for each response set. <responseSetId, Set<responseIds>>
     private val checkedItems = MutableStateFlow<Map<Int, Set<Int>>>(emptyMap())
 
-    private val checklistViewState = combine(
+    private val checklistViewState: StateFlow<ChecklistViewState> = combine(
         getChecklistUseCase(),
         checkedItems,
     ) { checklistItems, selectedItems ->
-            when {
-                checklistItems == null -> ChecklistViewState.Error
-                checklistItems.isEmpty() -> ChecklistViewState.Loading
-                else -> ChecklistViewState.Loaded(checklistItems.toPresentableModel(selectedItems))
-            }
+        when {
+            checklistItems == null -> ChecklistViewState.Error
+            checklistItems.isEmpty() -> ChecklistViewState.Loading
+            else -> ChecklistViewState.Loaded(checklistItems.toPresentableModel(selectedItems))
         }
-        .catch {
-            Log.e("ChecklistViewModelImpl", it.message ?: "Error occurred in the view state")
-            emit(ChecklistViewState.Error)
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = ChecklistViewState.Loading
-        )
+    }.catch {
+        Log.e("ChecklistViewModelImpl", it.message ?: "Error occurred in the view state")
+        emit(ChecklistViewState.Error)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = ChecklistViewState.Loading
+    )
 
-    override fun checklistViewState(): Flow<ChecklistViewState> {
-        return checklistViewState
-    }
+    override fun checklistViewState(): Flow<ChecklistViewState> = checklistViewState
 
     override fun refetchChecklist() {
         viewModelScope.launch(Dispatchers.Default) {

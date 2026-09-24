@@ -12,14 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.example.thechecklistapp.ui.screens.DetailedImageScreen
 import com.example.thechecklistapp.ui.screens.DetailedScreenCallbacks
 import com.example.thechecklistapp.ui.screens.MainChecklistScreen
 import com.example.thechecklistapp.ui.screens.MainChecklistScreenCallbacks
 import com.example.thechecklistapp.ui.viewmodel.ChecklistViewModel
 import com.example.thechecklistapp.ui.viewmodel.ChecklistViewState
+import com.example.thechecklistapp.ui.viewmodel.DetailedImageViewModel
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Serializable
 sealed class Screen {
@@ -68,13 +71,18 @@ fun SetupNavGraph(
                 }
             )
         }
-        composable<Screen.DetailedImageScreen> {
+        composable<Screen.DetailedImageScreen> { backStackEntry ->
+            val route = backStackEntry.toRoute<Screen.DetailedImageScreen>()
+            val viewModel = koinViewModel<DetailedImageViewModel>(parameters = { parametersOf(route.imageSectionId) })
+            val imageViewState by viewModel.imageViewState().collectAsState()
+
             DetailedImageScreen(
+                imageViewState = imageViewState,
                 callbacks = remember {
                     DetailedScreenCallbacks(
                         onBackClick = { navController.popBackStack() }
                     )
-                }
+                },
             )
         }
     }
