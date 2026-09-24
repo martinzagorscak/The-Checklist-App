@@ -23,6 +23,7 @@ import com.example.thechecklistapp.ui.components.IconButton
 import com.example.thechecklistapp.ui.components.TopBar
 import com.example.thechecklistapp.ui.theme.Typography
 import com.example.thechecklistapp.ui.theme.padding400
+import com.example.thechecklistapp.ui.theme.padding800
 import com.example.thechecklistapp.ui.viewmodel.DetailedImageViewState
 
 @Composable
@@ -91,7 +92,7 @@ fun DetailedImageScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(horizontal = padding400),
+                    .padding(horizontal = padding800),
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
@@ -100,7 +101,6 @@ fun DetailedImageScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                // TODO implement with Shared Element Transition
                 AsyncImage(
                     model = imageViewState.src,
                     contentDescription = null,

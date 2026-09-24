@@ -1,15 +1,21 @@
 package com.example.thechecklistapp.ui.screens
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.thechecklistapp.R
+import com.example.thechecklistapp.ui.components.AlignInTheMiddle
+import com.example.thechecklistapp.ui.components.CTA
+import com.example.thechecklistapp.ui.components.Checklist
+import com.example.thechecklistapp.ui.components.ChecklistCallbacks
+import com.example.thechecklistapp.ui.components.FallbackState
+import com.example.thechecklistapp.ui.components.TopBar
 import com.example.thechecklistapp.ui.viewmodel.ChecklistViewState
 
 @Composable
@@ -19,19 +25,52 @@ fun MainChecklistScreen(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
+        topBar = {
+            TopBar(title = stringResource(R.string.checklist_screen_title))
+        },
         modifier = modifier.fillMaxSize(),
     ) { paddingValues ->
-        // TODO Render the checklist items based on the checklistViewState
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .clickable(onClick = { callbacks.onImageClick(4) })
-        ) {
-            Text(
-                text = "Main Checklist Screen",
-                modifier = Modifier.align(Alignment.Center)
-            )
+        when (checklistViewState) {
+            is ChecklistViewState.Loaded -> {
+                Checklist(
+                    checklistItems = checklistViewState.checklistItems,
+                    checklistCallbacks = remember {
+                        ChecklistCallbacks(
+                            onImageClick = callbacks.onImageClick,
+                            onSelectableOptionClick = callbacks.onSelectableOptionClick,
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                )
+            }
+
+            ChecklistViewState.Error -> {
+                AlignInTheMiddle(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    FallbackState(
+                        title = stringResource(R.string.try_again),
+                        cta = CTA(
+                            label = stringResource(R.string.checklist_screen_error_message),
+                            onClick = callbacks.onRetryClick,
+                        )
+                    )
+                }
+            }
+
+            ChecklistViewState.Loading -> {
+                AlignInTheMiddle(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 }

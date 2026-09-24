@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">The Checklist App</string>
+    <string name="checklist_screen_title">Checklist</string>
     <string name="detailed_image_screen_title">Detailed Image View</string>
     <string name="detailed_image_screen_error_message">Unable to load the image.</string>
     <string name="detailed_image_screen_not_found_message">Image not found.</string>
+    <string name="checklist_screen_error_message">Unable to load the checklist.</string>
+    <string name="try_again">Try Again</string>
 </resources>
