@@ -28,12 +28,10 @@ The Checklist App is an Android prototype that renders a dynamic checklist UI fr
 
 ## Project Structure
 
-- `data/` -> API, cache, persistence, repository, and DI setup
+- `data/` -> API, cache, persistence, repository
 - `domain/` -> domain models and use cases
 - `ui/` -> screens, components, navigation, theme, and view models
 - `device/` -> device-specific integrations such as connectivity monitoring
-
-Open the project in Android Studio and run the `app` configuration on an emulator or physical device.
 
 ## Assumptions and Tradeoffs
 
