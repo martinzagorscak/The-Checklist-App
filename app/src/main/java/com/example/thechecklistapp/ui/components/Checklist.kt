@@ -5,15 +5,21 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.thechecklistapp.R
@@ -42,6 +49,7 @@ private val minChecklistImageWidth = 100.dp
 private val maxChecklistImageWidth = 200.dp
 private val maxResponseSetHeight = 200.dp
 private val borderWidth = 1.dp
+private val labelScoreSize = 20.dp
 
 @Composable
 fun Checklist(
@@ -143,6 +151,11 @@ private fun Page(
         Text(
             text = page.title,
             style = Typography.bodyLarge,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.padding(vertical = padding100)
         )
         Checklist(
             checklistItems = page.items,
@@ -165,7 +178,7 @@ private fun Section(
     Column(modifier = modifier) {
         Text(
             text = section.title,
-            style = sectionTitleStyle(sectionDepth),
+            style = sectionTitleStyle(sectionDepth).copy(fontWeight = Typography.bodyMedium.fontWeight),
         )
         Checklist(
             checklistItems = section.items,
@@ -246,9 +259,8 @@ private fun ChoiceItem(
         ) {
             items(items = choiceItem.responseSet.responses, key = { "response-${it.id}" }) { response ->
                 val backgroundColor = if (response.isChecked) Primary40 else MaterialTheme.colorScheme.tertiary
-                Text(
-                    text = response.label,
-                    style = Typography.bodySmall,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(roundedCornerSize))
                         .background(backgroundColor)
@@ -260,7 +272,24 @@ private fun ChoiceItem(
                             )
                         })
                         .padding(padding200)
-                )
+                ) {
+                    Text(
+                        text = response.label,
+                        style = Typography.bodySmall,
+                    )
+                    response.score?.let {
+                        Spacer(modifier = Modifier.width(padding100))
+                        Text(
+                            text = it.toString(),
+                            style = Typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .size(labelScoreSize)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.outline)
+                        )
+                    }
+                }
             }
         }
     }
