@@ -72,9 +72,9 @@ fun MainChecklistScreen(
                         .padding(paddingValues)
                 ) {
                     FallbackState(
-                        title = stringResource(R.string.try_again),
+                        title = stringResource(R.string.checklist_screen_error_message),
                         cta = CTA(
-                            label = stringResource(R.string.checklist_screen_error_message),
+                            label = stringResource(R.string.try_again),
                             onClick = callbacks.onRetryClick,
                         )
                     )

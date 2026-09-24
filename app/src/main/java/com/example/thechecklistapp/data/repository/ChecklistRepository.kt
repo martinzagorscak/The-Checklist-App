@@ -58,7 +58,10 @@ internal class ChecklistRepositoryImpl(
 
     override fun getChecklist(): Flow<List<ChecklistItem>?> = checklistPublisher
 
-    override suspend fun refetchChecklist() = refetchChecklistPublisher.emit(Unit)
+    override suspend fun refetchChecklist() {
+        checklistPublisher.emit(emptyList())
+        refetchChecklistPublisher.emit(Unit)
+    }
 
     private suspend fun fetchChecklistFromApi(): List<ChecklistItem>? {
         val apiChecklistItems = checklistApi.getChecklistItems().getOrNull() ?: return null

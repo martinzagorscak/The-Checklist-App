@@ -17,7 +17,7 @@ interface ConnectivityStatusPublisher {
 
 internal class ConnectivityStatusPublisherImpl : ConnectivityStatusPublisher {
 
-    private val statusPublisher = MutableStateFlow<ConnectivityStatus?>(ConnectivityStatus.CONNECTED)
+    private val statusPublisher = MutableStateFlow<ConnectivityStatus?>(null)
 
     override fun status(): Flow<ConnectivityStatus?> = statusPublisher
 
