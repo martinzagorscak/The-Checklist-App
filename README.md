@@ -54,7 +54,7 @@ Open the project in Android Studio and run the `app` configuration on an emulato
 - **Backend integration**: Replace the single static JSON endpoint with a managed API.
 
 ## Note:
-GitHub repository is connected with Bitrise CI/CD, so you can test the by downloading app [here]().
+GitHub repository is connected to Bitrise CI/CD, so you can test the app by downloading it [here](https://app.bitrise.io/app/f443d181-cacb-4a7e-ab0f-73723beaeaee/installable-artifacts/05e4cd196fcb2d5f/public-install-page/f2375da0da1b2560e9fc8f52ea4cb239).
 
 **Specs can be found [here](specs.pdf).**
 
